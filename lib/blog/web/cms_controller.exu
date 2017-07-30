@@ -1,0 +1,27 @@
+namespace cms_controller
+include std/net/url.e
+include std/map.e
+include lib/blog/article.exu
+
+global procedure write(map params)
+    article:write(map:get(params, "title"), map:get(params, "body"))
+    sequence ids = article:get_all_ids()
+    object data = article:get_from_id(ids[1])
+    puts(2, data[1] & sprintf("%d", ids[length(ids)]))
+
+    puts(1, "Content-type: text/html\n\n")
+    puts(1, "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>Blog</title></head>\n")
+    puts(1, "<body>\n")
+    puts(1, "<h1>記事作成完了</h1>\n")
+    puts(1, "<br><a href=\"/article/?id=" & sprintf("%d", ids[length(ids)]) & "\">投稿した記事へ</a>")
+    puts(1, "</body></html>")
+end procedure
+
+global procedure write_form(map params)
+    puts(1, "Content-type: text/html\n\n")
+    puts(1, "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>Blog</title></head>\n")
+    puts(1, "<body>\n")
+    puts(1, "<h1>記事作成フォーム</h1>\n")
+    puts(1, "<form action=\"/cms_write/\" method=\"POST\" accept-charset=\"UTF-8\"> <input type=\"text\" name=\"title\"><br> <textarea name=\"body\"></textarea><br> <input type=\"submit\" value=\"enter\"> </form>")
+    puts(1, "</body></html>")
+end procedure

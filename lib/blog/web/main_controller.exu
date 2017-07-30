@@ -1,0 +1,30 @@
+namespace main_controller
+include std/convert.e
+include std/map.e
+include lib/blog/article.exu
+
+global procedure view(map params)
+    atom id = convert:to_integer(map:get(params, "id"))
+    object data = article:get_from_id(id)
+
+    puts(1, "Content-type: text/html\n\n")
+    puts(1, "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>" & data[1] & " - Blog</title></head>\n")
+    puts(1, "<body>\n")
+    puts(1, "<h1>" & data[1] & "</h1>")
+    puts(1, data[2])
+    puts(1, "<hr><a href=\"/\">return index</a></body></html>")
+end procedure
+
+global procedure index(map params)
+    sequence ids = article:get_all_ids()
+
+    puts(1, "Content-type: text/html\n\n")
+    puts(1, "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>Blog</title></head>\n")
+    puts(1, "<body>\n")
+    puts(1, "blog index<br>\n")
+    for i = 1 to length(ids) do
+        atom id = ids[i]
+        puts(1, "<br><a href=\"/article/?id=" & sprintf("%d", id ) & "\">id:" & sprintf("%d", id) & "の記事へ</a>")
+    end for
+    puts(1, "<hr><a href=\"/cms/\">記事を書く</a></body></html>")
+end procedure
