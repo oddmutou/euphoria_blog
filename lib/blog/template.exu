@@ -1,0 +1,30 @@
+namespace template
+
+include std/map.e
+include std/regex.e
+include std/sequence.e
+
+map:map template_params
+
+function get_template_param(sequence params)
+    return map:get(template_params, params[2])
+end function
+
+global function process(sequence filepath, map:map params)
+    template_params = params
+    atom file_handle = open(filepath, "r")
+    sequence file_str = ""
+    object line
+    while 1 do
+        line = gets(file_handle)
+        if atom(line) then
+            exit
+        end if
+        file_str = file_str & line
+    end while
+    close(file_handle)
+
+    sequence param_keys = map:keys(params)
+    regex r = regex:new(`\[%\s+([^\s]+)\s+%\]`)
+    return regex:find_replace_callback(r, file_str, routine_id("get_template_param"))
+end function
