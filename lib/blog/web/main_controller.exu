@@ -1,6 +1,7 @@
 namespace main_controller
 include std/convert.e
 include std/map.e
+include std/sequence.e
 include lib/blog/article.exu
 include lib/blog/template.exu
 include lib/blog/web/response.exu
@@ -25,15 +26,13 @@ end procedure
 global procedure index(map params)
     sequence ids = article:get_all_ids()
 
-    sequence article_list = ""
+    sequence str_ids = {}
     for i = 1 to length(ids) do
-        atom id = ids[i]
-        article_list = article_list
-            & sprintf("<li><a href=\"/article/?id=%d\">No: %d</a></li>\n", {id, id})
+        str_ids = append(str_ids, convert:to_string(ids[i]))
     end for
 
     map template_params = new_from_kvpairs({
-        {"article_list", article_list}
+        {"article_numbers", str_ids}
     })
 
     response:create(200, "utf-8", template:process("view/main/index.html", template_params))

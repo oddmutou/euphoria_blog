@@ -8,7 +8,9 @@
 <h1>Blog</h1>
 <p>
 <ul>
-[% article_list %]
+    [% FOREACH article_number IN article_numbers %]
+    <li><a href="/article/?id=[% article_number %]">No: [% article_number %]</a></li>
+    [% END FOREACH %]
 </ul>
 </p>
 <hr>

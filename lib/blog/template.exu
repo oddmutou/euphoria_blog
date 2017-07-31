@@ -6,6 +6,21 @@ include std/sequence.e
 
 map:map template_params
 
+regex:regex for_loop_regex =
+    regex:new(`\[%\s+FOREACH\s+([^\s]+)\s+IN\s+([^\s]+)\s+%\]((?:[^\[]|\[[^%]|\[%[^\s]+|\[%\s+[^E])*)\[%\s+END\s+FOREACH\s+%\]`)
+regex:regex variable_regex = regex:new(`\[%\s+([^\s]+)\s+%\]`)
+
+function exec_for_loop(sequence params)
+    sequence for_list = map:get(template_params, params[3])
+
+    sequence result_text = ""
+    for i = 1 to length(for_list) do
+        result_text = result_text & regex:find_replace(regex:new(`\[%\s+` & params[2] & `\s+%\]`), params[4], for_list[i])
+    end for
+
+    return result_text
+end function
+
 function get_template_param(sequence params)
     return map:get(template_params, params[2])
 end function
@@ -24,7 +39,9 @@ global function process(sequence filepath, map:map params)
     end while
     close(file_handle)
 
-    sequence param_keys = map:keys(params)
-    regex r = regex:new(`\[%\s+([^\s]+)\s+%\]`)
-    return regex:find_replace_callback(r, file_str, routine_id("get_template_param"))
+    file_str = regex:find_replace_callback(for_loop_regex,
+        file_str, routine_id("exec_for_loop"))
+    file_str = regex:find_replace_callback(variable_regex,
+        file_str, routine_id("get_template_param"))
+    return file_str
 end function
