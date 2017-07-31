@@ -3,6 +3,7 @@ include std/net/url.e
 include std/map.e
 include lib/blog/article.exu
 include lib/blog/template.exu
+include lib/blog/web/response.exu
 
 global procedure write(map params)
     article:write(map:get(params, "title"), map:get(params, "body"))
@@ -12,14 +13,12 @@ global procedure write(map params)
         {"article_number", sprintf("%d", ids[length(ids)])}
     })
 
-    puts(1, "Content-type: text/html\n\n")
-    puts(1, template:process("view/cms/write_done.html", template_params))
+    response:create(200, "utf-8", template:process("view/cms/write_done.html", template_params))
 end procedure
 
 global procedure write_form(map params)
     map template_params = new_from_kvpairs({
     })
 
-    puts(1, "Content-type: text/html\n\n")
-    puts(1, template:process("view/cms/writebox.html", template_params))
+    response:create(200, "utf-8", template:process("view/cms/writebox.html", template_params))
 end procedure

@@ -1,0 +1,20 @@
+namespace response
+
+include std/convert.e
+include std/regex.e
+
+type http_status_code(object m)
+  if not atom( m ) then
+    return 0
+  end if
+  return regex:is_match(
+      regex:new("^[1-5][0-9][0-9]$"),
+      convert:to_string(m)
+  )
+end type
+
+global procedure create(http_status_code status, sequence charset, sequence body)
+    printf(1, "Status: %d\n", status)
+    printf(1, "Content-type: text/html;charset=%s\n\n", {charset})
+    printf(1, "%s", {body})
+end procedure

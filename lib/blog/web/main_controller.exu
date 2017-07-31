@@ -3,18 +3,23 @@ include std/convert.e
 include std/map.e
 include lib/blog/article.exu
 include lib/blog/template.exu
+include lib/blog/web/response.exu
 
 global procedure view(map params)
     atom id = convert:to_integer(map:get(params, "id"))
     object data = article:get_from_id(id)
+
+    if atom(data) then
+        unknown_action(params)
+        abort(1)
+    end if
 
     map template_params = new_from_kvpairs({
         {"title", data[1]},
         {"body", data[2]}
     })
 
-    puts(1, "Content-type: text/html\n\n")
-    puts(1, template:process("view/main/article.html", template_params))
+    response:create(200, "utf-8", template:process("view/main/article.html", template_params))
 end procedure
 
 global procedure index(map params)
@@ -31,6 +36,9 @@ global procedure index(map params)
         {"article_list", article_list}
     })
 
-    puts(1, "Content-type: text/html\n\n")
-    puts(1, template:process("view/main/index.html", template_params))
+    response:create(200, "utf-8", template:process("view/main/index.html", template_params))
+end procedure
+
+global procedure unknown_action(map params)
+    response:create(404, "utf-8", "Not Found")
 end procedure

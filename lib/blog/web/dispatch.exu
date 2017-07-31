@@ -22,7 +22,9 @@ global procedure dispatch()
             cms_controller:write(post_params)
         case "article" then
             main_controller:view(params)
-        case else
+        case "index" then
             main_controller:index(params)
+        case else
+            main_controller:unknown_action(params)
     end switch
 end procedure
