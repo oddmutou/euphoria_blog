@@ -1,0 +1,49 @@
+namespace session
+
+include std/datetime.e
+include std/eds.e
+
+constant DB_PATH = "blog.edb"
+constant TABLE_NAME = "session"
+
+global procedure set(sequence key, sequence user_name)
+    article_db_open()
+    atom now_epoch = datetime:to_unix(now())
+    if db_insert(key, {user_name, now_epoch}) != DB_OK then
+        puts(2, "insert failed\n")
+        abort(1)
+    end if
+    db_close()
+end procedure
+
+global function read(sequence key)
+    article_db_open()
+    atom id = db_find_key(key)
+    object user_name
+    if id < 0 then
+        user_name = 0
+    else
+        object data = db_record_data(id)
+        user_name = data[1]
+    end if
+    db_close()
+    return user_name
+end function
+
+procedure article_db_open()
+    if db_open(DB_PATH) != DB_OK then
+        if db_create(DB_PATH, DB_LOCK_NO) != DB_OK then
+            puts(2, "couldn't create database:" & DB_PATH & "\n")
+            abort(1)
+        end if
+        puts(2, "created database:" & DB_PATH & "\n")
+    end if
+
+    if db_select_table(TABLE_NAME) != DB_OK then
+        if db_create_table(TABLE_NAME) != DB_OK then
+            puts(2, "couldn't create table:" & TABLE_NAME & "\n")
+            abort(1)
+        end if
+        puts(2, "created table:" & TABLE_NAME & "\n")
+    end if
+end procedure

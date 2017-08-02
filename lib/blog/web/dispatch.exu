@@ -16,6 +16,10 @@ global procedure dispatch()
     end switch
 
     switch map:get(params, "action") do
+        case "login" then
+            cms_controller:login(post_params)
+        case "login_form" then
+            cms_controller:login_form(params)
         case "cms" then
             cms_controller:write_form(params)
         case "cms_write" then

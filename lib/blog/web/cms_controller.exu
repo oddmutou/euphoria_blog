@@ -1,11 +1,19 @@
 namespace cms_controller
 include std/net/url.e
 include std/map.e
+include std/text.e
 include lib/blog/article.exu
 include lib/blog/template.exu
+include lib/blog/web/auth.exu
 include lib/blog/web/response.exu
 
 global procedure write(map params)
+    object user_name = auth:check()
+    if atom(user_name) then
+        response:create_redirect(303, "utf-8", "Redirect", "/login_form/")
+        abort(1)
+    end if
+
     article:write(map:get(params, "title"), map:get(params, "body"))
     sequence ids = article:get_all_ids()
 
@@ -18,9 +26,49 @@ global procedure write(map params)
 end procedure
 
 global procedure write_form(map params)
+    object user_name = auth:check()
+    if atom(user_name) then
+        response:create_redirect(303, "utf-8", "Redirect", "/login_form/")
+        abort(1)
+    end if
+
     map template_params = new_from_kvpairs({
-        {"page_title", "記事作成フォーム - Blog"}
+        {"page_title", "記事作成フォーム - Blog"},
+        {"user_name", user_name}
     })
 
     response:create(200, "utf-8", template:process("view/cms/writebox.html", template_params))
+end procedure
+
+global procedure login(map params)
+    object session_data = auth:login(
+        text:trim(map:get(params, "user_name")), text:trim(map:get(params, "password")))
+    if atom(session_data) then
+        response:create_redirect(303, "utf-8", "Redirect", "/login_form/?error=1")
+        abort(1)
+    end if
+
+    sequence session_key = session_data[1]
+    sequence session_expire = session_data[2]
+
+    map template_params = new_from_kvpairs({
+        {"page_title", "ログイン完了 - Blog"}
+    })
+
+    response:create_with_cookie(200, "utf-8", template:process("view/cms/login_done.html", template_params),
+        sprintf("session=%s; expires=%s; path=/", {session_key, session_expire}))
+end procedure
+
+global procedure login_form(map params)
+    sequence error = ""
+    if sequence(map:get(params, "error")) then
+        error = "ログインに失敗しました。"
+    end if
+
+    map template_params = new_from_kvpairs({
+        {"error", error},
+        {"page_title", "ログインフォーム - Blog"}
+    })
+
+    response:create(200, "utf-8", template:process("view/cms/login_form.html", template_params))
 end procedure

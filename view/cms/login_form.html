@@ -1,0 +1,23 @@
+[% INCLUDE view/include/head.html %]
+<h1>ログインフォーム</h1>
+<p>
+[% error %]
+<form action="/login/" method="POST" accept-charset="UTF-8" class="pure-form pure-form-aligned">
+  <fieldset>
+    <div class="pure-control-group">
+      <label for="user_name">ユーザー名</label>
+      <input type="text" name="user_name" class="pure-input-1-4">
+    </div>
+    <div class="pure-control-group">
+      <label for="password">パスワード</label>
+      <input type="password" name="password" class="pure-input-1-4">
+    </div>
+    <div class="pure-controls">
+      <input type="submit" value="enter" class="pure-button pure-button-primary">
+    </div>
+  </fieldset>
+</form>
+</p>
+<hr>
+<a href="/">return index</a>
+[% INCLUDE view/include/foot.html %]

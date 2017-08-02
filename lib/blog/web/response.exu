@@ -18,3 +18,13 @@ global procedure create(http_status_code status, sequence charset, sequence body
     printf(1, "Content-type: text/html;charset=%s\n\n", {charset})
     printf(1, "%s", {body})
 end procedure
+
+global procedure create_with_cookie(http_status_code status, sequence charset, sequence body, sequence cookie)
+    printf(1, "Set-Cookie: %s\n", {cookie})
+    response:create(status, charset, body)
+end procedure
+
+global procedure create_redirect(http_status_code status, sequence charset, sequence body, sequence location)
+    printf(1, "Location: %s\n", {location})
+    response:create(status, charset, body)
+end procedure
