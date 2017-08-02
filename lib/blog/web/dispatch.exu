@@ -1,34 +1,35 @@
 namespace dispatch
+
 include std/net/url.e
 include std/map.e
 include lib/blog/web/cms_controller.exu
 include lib/blog/web/main_controller.exu
 
 global procedure dispatch()
-    map params
-    map post_params
+    map:map params
     switch getenv("REQUEST_METHOD") do
         case "POST" then
-            post_params = url:parse_querystring(gets(0))
             params = url:parse_querystring(getenv("QUERY_STRING"))
+            map:map post_params = url:parse_querystring(gets(0))
+            sequence keys = map:keys(post_params)
+            for i = 1 to length(keys) do
+                map:put(params, keys[i], map:get(post_params, keys[i]))
+            end for
         case else
             params = url:parse_querystring(getenv("QUERY_STRING"))
     end switch
 
-    switch map:get(params, "action") do
-        case "login" then
-            cms_controller:login(post_params)
-        case "login_form" then
-            cms_controller:login_form(params)
-        case "cms" then
-            cms_controller:write_form(params)
-        case "cms_write" then
-            cms_controller:write(post_params)
-        case "article" then
-            main_controller:view(params)
-        case "index" then
-            main_controller:index(params)
-        case else
-            main_controller:unknown_action(params)
-    end switch
+    map:map route = map:new_from_kvpairs({
+        {"login", "cms_controller:login_user"},
+        {"login_form", "cms_controller:login_form"},
+        {"cms", "cms_controller:write_form"},
+        {"cms_write", "cms_controller:write_article"},
+        {"article", "main_controller:view"},
+        {"index", "main_controller:index"}
+    })
+    object routine_name = map:get(route, map:get(params, "action"))
+    if (atom(routine_name)) then
+        routine_name = "main_controller:unknown_action"
+    end if
+    printf(1, call_func(routine_id(routine_name), {params}))
 end procedure

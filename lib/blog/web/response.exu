@@ -13,18 +13,24 @@ type http_status_code(object m)
   )
 end type
 
-global procedure create(http_status_code status, sequence charset, sequence body)
-    printf(1, "Status: %d\n", status)
-    printf(1, "Content-type: text/html;charset=%s\n\n", {charset})
-    printf(1, "%s", {body})
-end procedure
+global function create(http_status_code status, sequence charset, sequence body)
+    return sprintf("Status: %d\n", status)
+        & sprintf("Content-type: text/html; charset=%s\n\n", {charset})
+        & sprintf("%s", {body})
+end function
 
-global procedure create_with_cookie(http_status_code status, sequence charset, sequence body, sequence cookie)
-    printf(1, "Set-Cookie: %s\n", {cookie})
-    response:create(status, charset, body)
-end procedure
+global function create_with_cookie(sequence body, sequence cookie)
+    return sprintf("Set-Cookie: %s\n", {cookie}) & response:create(200, "utf-8", body)
+end function
 
-global procedure create_redirect(http_status_code status, sequence charset, sequence body, sequence location)
-    printf(1, "Location: %s\n", {location})
-    response:create(status, charset, body)
-end procedure
+global function create_redirect(sequence location)
+    return sprintf("Location: %s\n", {location}) & response:create(303, "utf-8", "303 See Other")
+end function
+
+global function create_ok(sequence body)
+    return response:create(200, "utf-8", body)
+end function
+
+global function create_not_found()
+    return response:create(404, "utf-8", "404 Not Found")
+end function

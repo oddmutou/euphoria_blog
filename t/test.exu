@@ -1,0 +1,14 @@
+include std/unittest.e
+include lib/blog/web/response.exu
+
+test_equal("create response",
+    response:create(200, "utf-8", "testbody"),
+    "Status: 200\nContent-type: text/html; charset=utf-8\n\ntestbody")
+test_equal("create ok response",
+    response:create_ok("testbody"),
+    response:create(200, "utf-8", "testbody"))
+test_equal("create not found response",
+    response:create_not_found(),
+    response:create(404, "utf-8", "404 Not Found"))
+
+test_report()

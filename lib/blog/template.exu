@@ -6,11 +6,6 @@ include std/sequence.e
 
 map:map template_params
 
-regex:regex include_regex = regex:new(`\[%\s+INCLUDE\s+([^\s]+)\s+%\]`)
-regex:regex for_loop_regex =
-    regex:new(`\[%\s+FOREACH\s+([^\s]+)\s+IN\s+([^\s]+)\s+%\]((?:[^\[]|\[[^%]|\[%[^\s]+|\[%\s+[^E])*)\[%\s+END\s+FOREACH\s+%\]`)
-regex:regex variable_regex = regex:new(`\[%\s+([^\s]+)\s+%\]`)
-
 function exec_include(sequence params)
     return slurp(params[2])
 end function
@@ -47,12 +42,18 @@ end function
 
 global function process(sequence filepath, map:map params)
     template_params = params
+
+    sequence process_list = {
+        {regex:new(`\[%\s+INCLUDE\s+([^\s]+)\s+%\]`), routine_id("exec_include")},
+        {regex:new(`\[%\s+FOREACH\s+([^\s]+)\s+IN\s+([^\s]+)\s+%\]((?:[^\[]|\[[^%]|\[%[^\s]+|\[%\s+[^E])*)\[%\s+END\s+FOREACH\s+%\]`)
+            , routine_id("exec_for_loop")},
+        {regex:new(`\[%\s+([^\s]+)\s+%\]`), routine_id("get_template_param")}
+    }
+
     sequence file_str = slurp(filepath)
-    file_str = regex:find_replace_callback(include_regex,
-        file_str, routine_id("exec_include"))
-    file_str = regex:find_replace_callback(for_loop_regex,
-        file_str, routine_id("exec_for_loop"))
-    file_str = regex:find_replace_callback(variable_regex,
-        file_str, routine_id("get_template_param"))
+    for i = 1 to length(process_list) do
+        file_str = regex:find_replace_callback(process_list[i][1]
+            , file_str, process_list[i][2])
+    end for
     return file_str
 end function

@@ -7,11 +7,10 @@ include lib/blog/template.exu
 include lib/blog/web/auth.exu
 include lib/blog/web/response.exu
 
-global procedure write(map params)
+global function write_article(map params)
     object user_name = auth:check()
     if atom(user_name) then
-        response:create_redirect(303, "utf-8", "Redirect", "/login_form/")
-        abort(1)
+        return response:create_redirect("/login_form/")
     end if
 
     article:write(map:get(params, "title"), map:get(params, "body"))
@@ -22,14 +21,13 @@ global procedure write(map params)
         {"page_title", "記事作成完了 - Blog"}
     })
 
-    response:create(200, "utf-8", template:process("view/cms/write_done.html", template_params))
-end procedure
+    return response:create_ok(template:process("view/cms/write_done.html", template_params))
+end function
 
-global procedure write_form(map params)
+global function write_form(map params)
     object user_name = auth:check()
     if atom(user_name) then
-        response:create_redirect(303, "utf-8", "Redirect", "/login_form/")
-        abort(1)
+        return response:create_redirect("/login_form/")
     end if
 
     map template_params = new_from_kvpairs({
@@ -37,15 +35,14 @@ global procedure write_form(map params)
         {"user_name", user_name}
     })
 
-    response:create(200, "utf-8", template:process("view/cms/writebox.html", template_params))
-end procedure
+    return response:create_ok(template:process("view/cms/writebox.html", template_params))
+end function
 
-global procedure login(map params)
+global function login_user(map params)
     object session_data = auth:login(
         text:trim(map:get(params, "user_name")), text:trim(map:get(params, "password")))
     if atom(session_data) then
-        response:create_redirect(303, "utf-8", "Redirect", "/login_form/?error=1")
-        abort(1)
+        return response:create_redirect("/login_form/?error=1")
     end if
 
     sequence session_key = session_data[1]
@@ -55,11 +52,11 @@ global procedure login(map params)
         {"page_title", "ログイン完了 - Blog"}
     })
 
-    response:create_with_cookie(200, "utf-8", template:process("view/cms/login_done.html", template_params),
+    return response:create_with_cookie(template:process("view/cms/login_done.html", template_params),
         sprintf("session=%s; expires=%s; path=/", {session_key, session_expire}))
-end procedure
+end function
 
-global procedure login_form(map params)
+global function login_form(map params)
     sequence error = ""
     if sequence(map:get(params, "error")) then
         error = "ログインに失敗しました。"
@@ -70,5 +67,5 @@ global procedure login_form(map params)
         {"page_title", "ログインフォーム - Blog"}
     })
 
-    response:create(200, "utf-8", template:process("view/cms/login_form.html", template_params))
-end procedure
+    return response:create_ok(template:process("view/cms/login_form.html", template_params))
+end function

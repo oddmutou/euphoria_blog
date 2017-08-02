@@ -6,13 +6,12 @@ include lib/blog/article.exu
 include lib/blog/template.exu
 include lib/blog/web/response.exu
 
-global procedure view(map params)
+global function view(map params)
     atom id = convert:to_integer(map:get(params, "id"))
     object data = article:get_from_id(id)
 
     if atom(data) then
-        unknown_action(params)
-        abort(1)
+        return unknown_action(params)
     end if
 
     map template_params = new_from_kvpairs({
@@ -22,10 +21,10 @@ global procedure view(map params)
 
     })
 
-    response:create(200, "utf-8", template:process("view/main/article.html", template_params))
-end procedure
+    return response:create_ok(template:process("view/main/article.html", template_params))
+end function
 
-global procedure index(map params)
+global function index(map params)
     sequence ids = article:get_all_ids()
 
     sequence str_ids = {}
@@ -38,9 +37,9 @@ global procedure index(map params)
         {"page_title", "Blog"}
     })
 
-    response:create(200, "utf-8", template:process("view/main/index.html", template_params))
-end procedure
+    return response:create_ok(template:process("view/main/index.html", template_params))
+end function
 
-global procedure unknown_action(map params)
-    response:create(404, "utf-8", "Not Found")
-end procedure
+global function unknown_action(map params)
+    return response:create_not_found()
+end function
