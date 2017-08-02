@@ -10,7 +10,8 @@ global procedure write(map params)
     sequence ids = article:get_all_ids()
 
     map template_params = new_from_kvpairs({
-        {"article_number", sprintf("%d", ids[length(ids)])}
+        {"article_number", sprintf("%d", ids[length(ids)])},
+        {"page_title", "記事作成完了 - Blog"}
     })
 
     response:create(200, "utf-8", template:process("view/cms/write_done.html", template_params))
@@ -18,6 +19,7 @@ end procedure
 
 global procedure write_form(map params)
     map template_params = new_from_kvpairs({
+        {"page_title", "記事作成フォーム - Blog"}
     })
 
     response:create(200, "utf-8", template:process("view/cms/writebox.html", template_params))

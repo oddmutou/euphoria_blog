@@ -6,9 +6,14 @@ include std/sequence.e
 
 map:map template_params
 
+regex:regex include_regex = regex:new(`\[%\s+INCLUDE\s+([^\s]+)\s+%\]`)
 regex:regex for_loop_regex =
     regex:new(`\[%\s+FOREACH\s+([^\s]+)\s+IN\s+([^\s]+)\s+%\]((?:[^\[]|\[[^%]|\[%[^\s]+|\[%\s+[^E])*)\[%\s+END\s+FOREACH\s+%\]`)
 regex:regex variable_regex = regex:new(`\[%\s+([^\s]+)\s+%\]`)
+
+function exec_include(sequence params)
+    return slurp(params[2])
+end function
 
 function exec_for_loop(sequence params)
     sequence for_list = map:get(template_params, params[3])
@@ -25,20 +30,26 @@ function get_template_param(sequence params)
     return map:get(template_params, params[2])
 end function
 
-global function process(sequence filepath, map:map params)
-    template_params = params
-    atom file_handle = open(filepath, "r")
-    sequence file_str = ""
+function slurp(sequence read_filepath)
+    atom file_handle = open(read_filepath, "r")
+    sequence result_str = ""
     object line
     while 1 do
         line = gets(file_handle)
         if atom(line) then
             exit
         end if
-        file_str = file_str & line
+        result_str = result_str & line
     end while
     close(file_handle)
+    return result_str
+end function
 
+global function process(sequence filepath, map:map params)
+    template_params = params
+    sequence file_str = slurp(filepath)
+    file_str = regex:find_replace_callback(include_regex,
+        file_str, routine_id("exec_include"))
     file_str = regex:find_replace_callback(for_loop_regex,
         file_str, routine_id("exec_for_loop"))
     file_str = regex:find_replace_callback(variable_regex,

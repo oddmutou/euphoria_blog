@@ -16,8 +16,10 @@ global procedure view(map params)
     end if
 
     map template_params = new_from_kvpairs({
-        {"title", data[1]},
-        {"body", data[2]}
+        {"body", data[2]},
+        {"page_title", data[1] & " - Blog"},
+        {"title", data[1]}
+
     })
 
     response:create(200, "utf-8", template:process("view/main/article.html", template_params))
@@ -32,7 +34,8 @@ global procedure index(map params)
     end for
 
     map template_params = new_from_kvpairs({
-        {"article_numbers", str_ids}
+        {"article_numbers", str_ids},
+        {"page_title", "Blog"}
     })
 
     response:create(200, "utf-8", template:process("view/main/index.html", template_params))
