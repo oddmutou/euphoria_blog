@@ -1,10 +1,14 @@
 [% INCLUDE view/include/head.html %]
 <h1>記事作成フォーム</h1>
 <p>
-<form action="/cms_write/" method="POST" accept-charset="UTF-8">
-    <input type="text" name="title"><br>
-    <textarea name="body"></textarea><br>
-    <input type="submit" value="enter">
+<form action="/cms_write/" method="POST" accept-charset="UTF-8" class="pure-form pure-form-stacked">
+  <fieldset>
+    <label for="title">タイトル</label>
+    <input type="text" name="title" class="pure-input-3-4">
+    <label for="body">本文</label>
+    <textarea name="body" class="pure-input-3-4" rows="15"></textarea>
+    <input type="submit" value="enter" class="pure-button pure-input-3-4 pure-button-primary">
+  </fieldset>
 </form>
 </p>
 <hr>
