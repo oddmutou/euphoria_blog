@@ -10,7 +10,7 @@ include lib/blog/web/response.exu
 global function write_article(map params)
     object user_name = auth:check()
     if atom(user_name) then
-        return response:create_redirect("/login_form/")
+        return response:create_redirect("/cms/login_form/")
     end if
 
     article:write(map:get(params, "title"), map:get(params, "body"))
@@ -27,7 +27,7 @@ end function
 global function write_form(map params)
     object user_name = auth:check()
     if atom(user_name) then
-        return response:create_redirect("/login_form/")
+        return response:create_redirect("/cms/login_form/")
     end if
 
     map template_params = new_from_kvpairs({
@@ -42,7 +42,7 @@ global function login_user(map params)
     object session_data = auth:login(
         text:trim(map:get(params, "user_name")), text:trim(map:get(params, "password")))
     if atom(session_data) then
-        return response:create_redirect("/login_form/?error=1")
+        return response:create_redirect("/cms/login_form/?error=1")
     end if
 
     sequence session_key = session_data[1]

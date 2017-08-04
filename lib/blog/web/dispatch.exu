@@ -2,6 +2,7 @@ namespace dispatch
 
 include std/net/url.e
 include std/map.e
+include std/regex.e
 include lib/blog/web/cms_controller.exu
 include lib/blog/web/main_controller.exu
 
@@ -19,15 +20,18 @@ global procedure dispatch()
             params = url:parse_querystring(getenv("QUERY_STRING"))
     end switch
 
+    sequence request_path = regex:find_replace(
+            regex:new(`([^\?]+).*`), getenv("REQUEST_URI"), `\1`)
+
     map:map route = map:new_from_kvpairs({
-        {"login", "cms_controller:login_user"},
-        {"login_form", "cms_controller:login_form"},
-        {"cms", "cms_controller:write_form"},
-        {"cms_write", "cms_controller:write_article"},
-        {"article", "main_controller:view"},
-        {"index", "main_controller:index"}
+        {"/cms/login/", "cms_controller:login_user"},
+        {"/cms/login_form/", "cms_controller:login_form"},
+        {"/cms/", "cms_controller:write_form"},
+        {"/cms/write/", "cms_controller:write_article"},
+        {"/article/", "main_controller:view"},
+        {"/", "main_controller:index"}
     })
-    object routine_name = map:get(route, map:get(params, "action"))
+    object routine_name = map:get(route, request_path)
     if (atom(routine_name)) then
         routine_name = "main_controller:unknown_action"
     end if
