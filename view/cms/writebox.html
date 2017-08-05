@@ -4,12 +4,16 @@
   （[% user_name %]でログイン中）
 </p>
 <p>
+[% error %]
 <form action="/cms/write/" method="POST" accept-charset="UTF-8" class="pure-form pure-form-stacked">
   <fieldset>
     <label for="title">タイトル</label>
     <input type="text" name="title" class="pure-input-3-4">
     <label for="body">本文</label>
     <textarea name="body" class="pure-input-3-4" rows="15"></textarea>
+    <label for="auto_break" class="pure-checkbox">
+      <input name="auto_break" id="auto_break" type="checkbox" checked="checked"> 改行を&lt;br&gt;に変換する
+    </label>
     <input type="submit" value="enter" class="pure-button pure-input-3-4 pure-button-primary">
   </fieldset>
 </form>

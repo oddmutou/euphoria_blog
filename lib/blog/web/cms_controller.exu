@@ -1,4 +1,5 @@
 namespace cms_controller
+include std/convert.e
 include std/net/url.e
 include std/map.e
 include std/text.e
@@ -13,7 +14,21 @@ global function write_article(map params)
         return response:create_redirect("/cms/login_form/")
     end if
 
-    article:write(map:get(params, "title"), map:get(params, "body"))
+    object body = map:get(params, "body")
+    object title = map:get(params, "title")
+    if (length(text:trim(title)) < 1) then
+        return response:create_redirect("/cms/?error=title")
+    elsif (length(text:trim(body)) < 1) then
+        return response:create_redirect("/cms/?error=body")
+    end if
+    object auto_break = map:get(params, "auto_break")
+    if atom(auto_break) then
+        auto_break = 0
+    else
+        auto_break = 1
+    end if
+
+    article:write(title, body, auto_break)
     sequence ids = article:get_all_ids()
 
     map template_params = new_from_kvpairs({
@@ -30,7 +45,16 @@ global function write_form(map params)
         return response:create_redirect("/cms/login_form/")
     end if
 
+    sequence error = ""
+    switch map:get(params, "error") do
+        case "title" then
+            error = "タイトルが未入力です。"
+        case "body" then
+            error = "本文が未入力です。"
+    end switch
+
     map template_params = new_from_kvpairs({
+        {"error", error},
         {"page_title", "記事作成フォーム - Blog"},
         {"user_name", user_name}
     })

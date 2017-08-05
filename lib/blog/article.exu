@@ -2,6 +2,7 @@ namespace article
 
 include std/datetime.e
 include std/eds.e
+include std/regex.e
 include std/sequence.e
 
 constant DB_PATH = "blog.edb"
@@ -10,7 +11,10 @@ constant TABLE_NAME = "article"
 constant FIELDS = {
     "title", "body", "lastupdate"}
 
-global procedure write(sequence title, sequence body)
+global procedure write(sequence title, sequence body, atom auto_break)
+    if auto_break then
+        body = regex:find_replace(regex:new(`(\r\n|\r|\n)`), body, "<br>")
+    end if
     article_db_open()
     atom now_epoch = datetime:to_unix(now())
     if db_insert(now_epoch, {title, body, now_epoch}) != DB_OK then
